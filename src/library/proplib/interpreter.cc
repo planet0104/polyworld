@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include <sstream>
@@ -165,8 +166,11 @@ class InterpreterProcess {
             // redirect stdout
             REQUIRE( -1 != dup2(stdoutPipe[PIPE_WRITE], STDOUT_FILENO) );
 
-            // run child process image
-            execlp("python", "python", script_path.c_str(), NULL);
+            setenv("PYTHONUNBUFFERED", "1", 1);
+
+            // run child process image (python3 on Ubuntu 24.04; -u for pipe I/O)
+            execlp("python3", "python3", "-u", script_path.c_str(), NULL);
+            execlp("python", "python", "-u", script_path.c_str(), NULL);
             PANIC();
         }
     }

@@ -82,19 +82,19 @@ void TerminalUI::step()
 				gui = new MainWindow( simulationController, false );
 				connect( gui, SIGNAL(closing()),
 						 this, SLOT(guiClosing()) );
-				cout << "GUI shown. You may need to raise the window." << endl;
+				cout << "GUI 已显示，您可能需要将窗口置于前台。" << endl;
 			}
 		}
 		else
 		{
 			if( cmd != "help" )
 			{
-				cerr << "Invalid command." << endl;
+				cerr << "无效命令。" << endl;
 			}
 
-			cerr << "help - Show this message." << endl;
-			cerr << "end - End simulation." << endl;
-			cerr << "gui - Show GUI." << endl;
+			cerr << "help - 显示此帮助信息。" << endl;
+			cerr << "end - 结束仿真。" << endl;
+			cerr << "gui - 显示图形界面。" << endl;
 		}
 	}
 }

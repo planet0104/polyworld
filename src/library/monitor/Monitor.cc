@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 #include "AgentTracker.h"
 #include "CameraController.h"
@@ -87,7 +88,7 @@ void ChartMonitor::defineCurve( float rmin, float rmax, float r, float g, float 
 // BirthRateMonitor
 //===========================================================================
 BirthRateMonitor::BirthRateMonitor( TSimulation *_sim )
-	: ChartMonitor(_sim, "birthrate", "Birth Rate", "born / (born + created)")
+	: ChartMonitor(_sim, "birthrate", "出生率", "出生 / (出生 + 创建)")
 	, prevBorn(0),
 	prevCreated(0)
 {
@@ -127,7 +128,7 @@ void BirthRateMonitor::step( long timestep )
 // FitnessMonitor
 //===========================================================================
 FitnessMonitor::FitnessMonitor( TSimulation *_sim )
-	: ChartMonitor(_sim, "fitness", "Fitness", "maxfit, curmaxfit, avgfit")
+	: ChartMonitor(_sim, "fitness", "适应度", "最大/当前最大/平均适应度")
 {
 	defineCurve( 0.0, 1.0,
 				 1.0, 1.0, 1.0 );
@@ -152,7 +153,7 @@ void FitnessMonitor::step( long timestep )
 // FoodEnergyMonitor
 //===========================================================================
 FoodEnergyMonitor::FoodEnergyMonitor( TSimulation *_sim )
-	: ChartMonitor(_sim, "foodenergy", "Food Energy", "energy in, total, avg")
+	: ChartMonitor(_sim, "foodenergy", "食物能量", "流入, 总量, 平均")
 {
 	defineCurve( -1.0, 1.0 );
 	defineCurve( -1.0, 1.0 );
@@ -182,7 +183,7 @@ void FoodEnergyMonitor::updateCurve( int curve, FoodEnergyStatScope scope )
 // PopulationMonitor
 //===========================================================================
 PopulationMonitor::PopulationMonitor( TSimulation *_sim )
-	: ChartMonitor(_sim, "population", "Population", "Population")
+	: ChartMonitor(_sim, "population", "种群", "种群数量")
 {
 	float colors[][3] =
 		{
@@ -221,7 +222,7 @@ void PopulationMonitor::step( long timestep )
 // BrainMonitor
 //===========================================================================
 BrainMonitor::BrainMonitor( TSimulation *_sim, int _frequency, AgentTracker *_tracker )
-	: Monitor(BRAIN, _sim, "brainmonitor", "Brain Monitor", "Brain Monitor")
+	: Monitor(BRAIN, _sim, "brainmonitor", "大脑监视器", "大脑监视器")
 	, frequency(_frequency)
 	, tracker(_tracker)
 {
@@ -242,7 +243,7 @@ void BrainMonitor::step( long timestep )
 // PovMonitor
 //===========================================================================
 PovMonitor::PovMonitor( TSimulation *_sim )
-	: Monitor(POV, _sim, "pov", "POV", "POV")
+	: Monitor(POV, _sim, "pov", "视角", "视角")
 {
 }
 
@@ -263,7 +264,7 @@ StatusTextMonitor::StatusTextMonitor( TSimulation *_sim,
 									  int _frequencyDisplay,
 									  int _frequencyStore,
 									  bool _storePerformance )
-	: Monitor(STATUS_TEXT, _sim, "textstatus", "Text Status", "Text Status")
+	: Monitor(STATUS_TEXT, _sim, "textstatus", "文本状态", "文本状态")
 	, frequencyDisplay( _frequencyDisplay )
 	, frequencyStore( _frequencyStore )
 	, storePerformance( _storePerformance )
@@ -312,7 +313,7 @@ void StatusTextMonitor::step( long timestep )
 			for( ; iter != statusText.end(); ++iter )
 			{
 				// filter out performance stats
-				if( storePerformance || (0 != strncmp( *iter, "Rate", 4 )) )
+				if( storePerformance || (0 != strncmp( *iter, "速率 ", strlen("速率 ") )) )
 					fprintf( statusFile, "%s\n", *iter );
 			}
 
@@ -332,7 +333,7 @@ bool FarmMonitor::isFarmEnv()
 FarmMonitor::FarmMonitor( TSimulation *sim,
 						  int frequency,
 						  const vector<Property> &properties )
-: Monitor(FARM, sim, "farm", "Farm", "Farm")
+: Monitor(FARM, sim, "farm", "集群农场", "集群农场")
 , _frequency( frequency )
 , _properties( properties )
 {

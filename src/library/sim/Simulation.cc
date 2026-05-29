@@ -4874,10 +4874,10 @@ void TSimulation::getStatusText( StatusText& statusText,
 	// then we shouldn't sprintf all these strings, or put them in the statusText
 	// (but for now, the window always draws anyway, so it's not a big deal)
 
-	sprintf( t, "step = %ld", fStep );
+	sprintf( t, "时间步 = %ld", fStep );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "agents = %4d", objectxsortedlist::gXSortedObjects.getCount(AGENTTYPE) );
+	sprintf( t, "个体数 = %4d", objectxsortedlist::gXSortedObjects.getCount(AGENTTYPE) );
 	if (fNumDomains > 1)
 	{
 		sprintf(t2, " (%ld",fDomains[0].numAgents );
@@ -4900,7 +4900,7 @@ void TSimulation::getStatusText( StatusText& statusText,
 		}
 	}
 
-	sprintf( t, "food = %4d", objectxsortedlist::gXSortedObjects.getCount(FOODTYPE) );
+	sprintf( t, "食物数 = %4d", objectxsortedlist::gXSortedObjects.getCount(FOODTYPE) );
 	if (fNumDomains > 1)
 	{
 		sprintf(t2, " (%d",fDomains[0].foodCount );
@@ -4915,10 +4915,10 @@ void TSimulation::getStatusText( StatusText& statusText,
 	}
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "foodEnergy = %.1f", getFoodEnergy() );
+	sprintf( t, "食物能量 = %.1f", getFoodEnergy() );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "created  = %4ld", fNumberCreated );
+	sprintf( t, "创建数  = %4ld", fNumberCreated );
 	if (fNumDomains > 1)
 	{
 		sprintf( t2, " (%ld",fDomains[0].numcreated );
@@ -4933,16 +4933,16 @@ void TSimulation::getStatusText( StatusText& statusText,
 	}
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -random = %4ld", fNumberCreatedRandom );
+	sprintf( t, " -随机  = %4ld", fNumberCreatedRandom );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -two    = %4ld", fNumberCreated2Fit );
+	sprintf( t, " -双亲  = %4ld", fNumberCreated2Fit );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -one    = %4ld", fNumberCreated1Fit );
+	sprintf( t, " -单亲  = %4ld", fNumberCreated1Fit );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "born     = %4ld", fNumberBorn );
+	sprintf( t, "出生数  = %4ld", fNumberBorn );
 	if (fNumDomains > 1)
 	{
 		sprintf( t2, " (%ld",fDomains[0].numborn );
@@ -4958,11 +4958,11 @@ void TSimulation::getStatusText( StatusText& statusText,
 
 	if( (fHeuristicFitnessWeight != 0.0) || (fComplexityFitnessWeight != 0.0) || fLockStepWithBirthsDeathsLog )
 	{
-		sprintf( t, "born_v   = %4ld", fNumberBornVirtual );
+		sprintf( t, "虚拟出生 = %4ld", fNumberBornVirtual );
 		statusText.push_back( strdup( t ) );
 	}
 
-	sprintf( t, "died     = %4ld", fNumberDied );
+	sprintf( t, "死亡数  = %4ld", fNumberDied );
 	if (fNumDomains > 1)
 	{
 		sprintf( t2, " (%ld",fDomains[0].numdied );
@@ -4977,34 +4977,34 @@ void TSimulation::getStatusText( StatusText& statusText,
 	statusText.push_back( strdup( t ) );
 
 
-	sprintf( t, " -age    = %4ld", fNumberDiedAge );
+	sprintf( t, " -衰老  = %4ld", fNumberDiedAge );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -energy = %4ld", fNumberDiedEnergy );
+	sprintf( t, " -能量  = %4ld", fNumberDiedEnergy );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -fight  = %4ld", fNumberDiedFight );
+	sprintf( t, " -战斗  = %4ld", fNumberDiedFight );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -eat    = %4ld", fNumberDiedEat );
+	sprintf( t, " -进食  = %4ld", fNumberDiedEat );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -edge   = %4ld", fNumberDiedEdge );
+	sprintf( t, " -边界  = %4ld", fNumberDiedEdge );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -smite  = %4ld", fNumberDiedSmite );
+	sprintf( t, " -清除  = %4ld", fNumberDiedSmite );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, " -patch  = %4ld", fNumberDiedPatch );
+	sprintf( t, " -区域  = %4ld", fNumberDiedPatch );
 	statusText.push_back( strdup( t ) );
 
-    sprintf( t, "birthDenials = %ld", fBirthDenials );
+    sprintf( t, "出生拒绝 = %ld", fBirthDenials );
 	statusText.push_back( strdup( t ) );
 
-    sprintf( t, "miscDenials = %ld", fMiscDenials );
+    sprintf( t, "其他拒绝 = %ld", fMiscDenials );
 	statusText.push_back( strdup( t ) );
 
-    sprintf( t, "ageCreate = %ld", fLastCreated );
+    sprintf( t, "最近创建 = %ld", fLastCreated );
     if (fNumDomains > 1)
     {
         sprintf( t2, " (%ld",fDomains[0].lastcreate );
@@ -5018,7 +5018,7 @@ void TSimulation::getStatusText( StatusText& statusText,
     }
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "maxGapCreate = %ld", fMaxGapCreate );
+	sprintf( t, "最大创建间隔 = %ld", fMaxGapCreate );
 	if (fNumDomains > 1)
 	{
 		sprintf( t2, " (%ld",fDomains[0].maxgapcreate );
@@ -5033,18 +5033,18 @@ void TSimulation::getStatusText( StatusText& statusText,
 	statusText.push_back( strdup( t ) );
 
 	if( (fHeuristicFitnessWeight != 0.0) || (fComplexityFitnessWeight != 0.0) )
-		sprintf( t, "born_v/(c+bv) = %.2f", float(fNumberBornVirtual) / float(fNumberCreated + fNumberBornVirtual) );
+		sprintf( t, "虚拟出生比 = %.2f", float(fNumberBornVirtual) / float(fNumberCreated + fNumberBornVirtual) );
 	else
-		sprintf( t, "born/total = %.2f", float(fNumberBorn) / float(fNumberCreated + fNumberBorn) );
+		sprintf( t, "出生比例 = %.2f", float(fNumberBorn) / float(fNumberCreated + fNumberBorn) );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "Fitness m=%.2f, c=%.2f, a=%.2f", fMaxFitness, fCurrentMaxFitness[0] / fTotalHeuristicFitness, fAverageFitness );
+	sprintf( t, "适应度 最大=%.2f, 当前最大=%.2f, 平均=%.2f", fMaxFitness, fCurrentMaxFitness[0] / fTotalHeuristicFitness, fAverageFitness );
 	statusText.push_back( strdup( t ) );
 
 //	sprintf( t, "NormFit m=%.2f, c=%.2f, a=%.2f", fMaxFitness / fTotalHeuristicFitness, fCurrentMaxFitness[0] / fTotalHeuristicFitness, fAverageFitness / fTotalHeuristicFitness );
 //	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "Fittest =" );
+	sprintf( t, "最适个体 =" );
 	int fittestCount = min( 5, fFittest->size() );
 	for( int i = 0; i < fittestCount; i++ )
 	{
@@ -5064,7 +5064,7 @@ void TSimulation::getStatusText( StatusText& statusText,
 		statusText.push_back( strdup( t ) );
 	}
 
-	sprintf( t, "CurFit =" );
+	sprintf( t, "当前最适 =" );
 	for( int i = 0; i < fCurrentFittestCount; i++ )
 	{
 		sprintf( t2, " %lu", fCurrentFittestAgent[i]->Number() );
@@ -5083,13 +5083,13 @@ void TSimulation::getStatusText( StatusText& statusText,
 		statusText.push_back( strdup( t ) );
 	}
 
-	sprintf( t, "avgFoodEnergy = %.2f", (fAverageFoodEnergyIn - fAverageFoodEnergyOut) / (fAverageFoodEnergyIn + fAverageFoodEnergyOut) );
+	sprintf( t, "平均食物能量 = %.2f", (fAverageFoodEnergyIn - fAverageFoodEnergyOut) / (fAverageFoodEnergyIn + fAverageFoodEnergyOut) );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "totFoodEnergy = %.2f", (fTotalFoodEnergyIn - fTotalFoodEnergyOut) / (fTotalFoodEnergyIn + fTotalFoodEnergyOut) );
+	sprintf( t, "总食物能量 = %.2f", (fTotalFoodEnergyIn - fTotalFoodEnergyOut) / (fTotalFoodEnergyIn + fTotalFoodEnergyOut) );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "totEnergyEaten = %.1f", fTotalEnergyEaten[0] );
+	sprintf( t, "总进食能量 = %.1f", fTotalEnergyEaten[0] );
 	for( int i = 1; i < globals::numEnergyTypes; i++ )
 	{
 		sprintf( t2, ", %.1f", fTotalEnergyEaten[i] );
@@ -5104,7 +5104,7 @@ void TSimulation::getStatusText( StatusText& statusText,
 		deltaEnergy = fTotalEnergyEaten - lastTotalEnergyEaten;
 		lastTotalEnergyEaten = fTotalEnergyEaten;
 	}
-	sprintf( t, "EatRate = %.1f", deltaEnergy[0] / statusFrequency );
+	sprintf( t, "进食速率 = %.1f", deltaEnergy[0] / statusFrequency );
 	for( int i = 1; i < globals::numEnergyTypes; i++ )
 	{
 		sprintf( t2, ", %.1f", deltaEnergy[i] / statusFrequency );
@@ -5124,13 +5124,13 @@ void TSimulation::getStatusText( StatusText& statusText,
 		deltaBorn = numberBorn - lastNumberBorn;
 		lastNumberBorn = numberBorn;
 	}
-	sprintf( t, "MateRate = %.2f", (double) deltaBorn / statusFrequency );
+	sprintf( t, "交配速率 = %.2f", (double) deltaBorn / statusFrequency );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "LifeSpan = %lu \xb1 %lu [%lu, %lu]", nint( fLifeSpanStats.mean() ), nint( fLifeSpanStats.stddev() ), (unsigned long) fLifeSpanStats.min(), (unsigned long) fLifeSpanStats.max() );
+	sprintf( t, "寿命 = %lu \xb1 %lu [%lu, %lu]", nint( fLifeSpanStats.mean() ), nint( fLifeSpanStats.stddev() ), (unsigned long) fLifeSpanStats.min(), (unsigned long) fLifeSpanStats.max() );
 	statusText.push_back( strdup( t ) );
 
-	sprintf( t, "RecLifeSpan = %lu \xb1 %lu [%lu, %lu]", nint( fLifeSpanRecentStats.mean() ), nint( fLifeSpanRecentStats.stddev() ), (unsigned long) fLifeSpanRecentStats.min(), (unsigned long) fLifeSpanRecentStats.max() );
+	sprintf( t, "近期寿命 = %lu \xb1 %lu [%lu, %lu]", nint( fLifeSpanRecentStats.mean() ), nint( fLifeSpanRecentStats.stddev() ), (unsigned long) fLifeSpanRecentStats.min(), (unsigned long) fLifeSpanRecentStats.max() );
 	statusText.push_back( strdup( t ) );
 
 	// ---
@@ -5144,20 +5144,20 @@ void TSimulation::getStatusText( StatusText& statusText,
 			statusText.push_back( strdup( t ) );
 		};
 
-	addStat( "CurNeurons", fCurrentBrainStats.neuronCount );
+	addStat( "当前神经元", fCurrentBrainStats.neuronCount );
 
 	switch( Brain::config.architecture )
 	{
 	case Brain::Configuration::Groups:
-		addStat( "CurNeurGroups", fCurrentBrainStats.groups.groupCount );
+		addStat( "当前神经组", fCurrentBrainStats.groups.groupCount );
 		break;
 	case Brain::Configuration::Sheets:
-		addStat( "CurInternalSheets", fCurrentBrainStats.sheets.internalSheetCount );
-		addStat( "CurInternalNeurons", fCurrentBrainStats.sheets.internalNeuronCount );
+		addStat( "当前内部层", fCurrentBrainStats.sheets.internalSheetCount );
+		addStat( "当前内部神经元", fCurrentBrainStats.sheets.internalNeuronCount );
 		for( SheetSynapseType &type : SheetSynapseTypes )
 		{
 			char name[ 64 ];
-			sprintf( name, "CurSynapse%sTo%s", sheets::Sheet::getName(type.from), sheets::Sheet::getName(type.to) );
+			sprintf( name, "突触%s至%s", sheets::Sheet::getName(type.from), sheets::Sheet::getName(type.to) );
 
 			addStat( name, fCurrentBrainStats.sheets.synapseCount[type.from][type.to] );
 		}
@@ -5166,9 +5166,9 @@ void TSimulation::getStatusText( StatusText& statusText,
 		assert( false );
 	}
 
-	addStat( "CurSynapses", fCurrentBrainStats.synapseCount );
+	addStat( "当前突触", fCurrentBrainStats.synapseCount );
 
-	sprintf( t, "Rate %2.1f (%2.1f) %2.1f (%2.1f) %2.1f (%2.1f)",
+	sprintf( t, "速率 %2.1f (%2.1f) %2.1f (%2.1f) %2.1f (%2.1f)",
 			 fFramesPerSecondInstantaneous, fSecondsPerFrameInstantaneous,
 			 fFramesPerSecondRecent,        fSecondsPerFrameRecent,
 			 fFramesPerSecondOverall,       fSecondsPerFrameOverall  );
@@ -5181,7 +5181,7 @@ void TSimulation::getStatusText( StatusText& statusText,
 
 		for( int domainNumber = 0; domainNumber < fNumDomains; domainNumber++ )
 		{
-			sprintf( t, "Domain %d", domainNumber);
+			sprintf( t, "领域 %d", domainNumber);
 			statusText.push_back( strdup( t ) );
 
 			int numAgentsInAnyFoodPatch = 0;

@@ -47,7 +47,7 @@ MainWindow::MainWindow( SimulationController *_simulationController,
 {
 	QApplication::setQuitOnLastWindowClosed( endOnClose );
 
-	setWindowTitle( "Polyworld" );
+	setWindowTitle( "Polyworld 人工生命" );
 	setMinimumSize(QSize(200, 200));
 	loadSettings();
 
@@ -172,12 +172,12 @@ void MainWindow::createMonitorViews()
 void MainWindow::addRunMenu( QMenuBar *menuBar )
 {
 	// Run menu
-	QMenu* menu = new QMenu( "&Run", this );
+	QMenu* menu = new QMenu( "&运行", this );
 	menuBar->addMenu( menu );
 	
-	menu->addAction( "&Pause/Resume", this, SLOT(pauseOrResume()), Qt::CTRL + Qt::Key_P);
+	menu->addAction( "&暂停/继续", this, SLOT(pauseOrResume()), Qt::CTRL + Qt::Key_P);
 
-	pausedStepAction = new QAction( "Step", this );
+	pausedStepAction = new QAction( "单步", this );
 	pausedStepAction->setShortcut( Qt::Key_Right );
 	pausedStepAction->setEnabled( false );
 	connect( pausedStepAction, SIGNAL(triggered()),
@@ -186,12 +186,12 @@ void MainWindow::addRunMenu( QMenuBar *menuBar )
 
 	menu->addSeparator();
 
-	menu->addAction( "End At &Timestep...", this, SLOT(endAtTimestep()));
-	menu->addAction( "End &Now", this, SLOT(endNow()));
+	menu->addAction( "在指定&时间步结束...", this, SLOT(endAtTimestep()));
+	menu->addAction( "立即&结束", this, SLOT(endNow()));
 
 #if __APPLE__
 	// This is automatically moved over to the application menu.
-    menu->addAction( "&Quit", this, SLOT(endNow()) );
+    menu->addAction( "&退出", this, SLOT(endNow()) );
 #endif
 }
 
@@ -201,7 +201,7 @@ void MainWindow::addRunMenu( QMenuBar *menuBar )
 void MainWindow::addViewMenu( QMenuBar *menuBar )
 {
 	// View menu
-	QMenu *menu = new QMenu( "&View", this );
+	QMenu *menu = new QMenu( "&视图", this );
 	menuBar->addMenu( menu );
 
 	itfor( MonitorViews, monitorViews, it )
@@ -246,8 +246,8 @@ void MainWindow::endAtTimestep()
 		bool ok;
 		int requestedTimestep =
 			QInputDialog::getInt( this,
-								  "Enter Final Timestep",
-								  "On what timestep should Polyworld end?",
+								  "输入结束时间步",
+								  "Polyworld 应在哪个时间步结束？",
 								  defaultValue,
 								  1,
 								  INT_MAX,
@@ -260,7 +260,7 @@ void MainWindow::endAtTimestep()
 			if( result != "" )
 			{
 				QMessageBox::critical( this,
-									   "Failed Setting End Timestep",
+									   "设置结束时间步失败",
 									   result.c_str() );
 				promptAgain = true;
 				defaultValue = requestedTimestep;
@@ -317,8 +317,8 @@ bool MainWindow::exitOnUserConfirm()
 {
 	QMessageBox::StandardButton response =
 		QMessageBox::question( this,
-							   "Confirm End Polyworld",
-							   "Really end Polyworld now?",
+							   "确认结束 Polyworld",
+							   "确定要立即结束 Polyworld 吗？",
 							   QMessageBox::Yes | QMessageBox::Cancel,
 							   QMessageBox::Yes );
 

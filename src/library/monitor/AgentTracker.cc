@@ -53,7 +53,7 @@ string AgentTracker::getStateTitle()
 	}
 	else
 	{
-		strcpy( buf, "No Agent" );
+		strcpy( buf, "无个体" );
 	}
 
 	return buf;

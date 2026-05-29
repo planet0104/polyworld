@@ -175,9 +175,9 @@ Farm {
     Properties {
       type    Array
       default [
-        { Name "Step"; Title "step" },
-        { Name "AgentCount"; Title "agents" },
-	{ Name "FoodCount"; Title "food" }
+        { Name "Step"; Title "时间步" },
+        { Name "AgentCount"; Title "个体数" },
+	{ Name "FoodCount"; Title "食物数" }
       ]
       element {
         type    Object
@@ -298,6 +298,7 @@ MainScene {
   default {
     Enabled                   True
     Name                      "Main"
+    Title                     "主场景"
     CameraControllerSettings  "Main"
     Buffer {
       Width                   640
@@ -313,6 +314,7 @@ OverheadScene {
   type    Scene
   default {
     Name                      "Overhead"
+    Title                     "俯视图"
     CameraControllerSettings  "Overhead"
     Movie {
       Record                  False
@@ -325,7 +327,7 @@ SinglePOVScene {
   type    Scene
   default {
     Name                      "SinglePOV"
-    Title                     "Single POV"
+    Title                     "单视角"
     CameraControllerSettings  "POV"
     Movie {
       Record                  False

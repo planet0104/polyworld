@@ -10,7 +10,7 @@ OverheadScene {
 
 SinglePOVScene {
   Name                      "SinglePOV"
-  Title                     "Single POV"
+  Title                     "单视角"
   CameraControllerSettings  "POV"
   Movie {
     Path                    "singlepov.pmv"
