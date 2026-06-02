@@ -102,8 +102,8 @@ int main( int argc, char** argv )
 			monitorPath = "./etc/" + ui + ".mf";
 	}
 
-	// Make sure we're in an appropriate working directory
-#if __linux__
+	// Make sure we're in an appropriate working directory (Linux only; not used on MSYS2/Windows)
+#if defined(__linux__) && !defined(__MINGW32__) && !defined(__MINGW64__)
 	{
 		char exe[1024];
 		int rc = readlink( "/proc/self/exe", exe, sizeof(exe) );

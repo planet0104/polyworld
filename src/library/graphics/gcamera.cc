@@ -11,6 +11,7 @@
 // System
 #include <gl.h>
 #include <glu.h>
+#include <cstdint>
 #include <iostream>
 #include <stdlib.h>
 
@@ -315,7 +316,7 @@ void gcamera::print()
              
     if (fFollowObject != NULL)
     {
-        long address = long(fFollowObject);
+        intptr_t address = reinterpret_cast<intptr_t>(fFollowObject);
         const char* objname = fFollowObject->GetName();
         cout << "  attached to object at " << address
              << " named: \"" << objname qnl;

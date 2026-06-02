@@ -14,7 +14,7 @@ import sys
 ######################################################################
 Conf='Makefile.conf'
 
-Supported_OSes = ['linux', 'darwin', 'bigred2']
+Supported_OSes = ['linux', 'darwin', 'bigred2', 'msys2']
 Supported_OSes_display = ','.join(Supported_OSes)
 
 Supported_Toolchains = ['gcc', 'llvm']
@@ -22,7 +22,26 @@ Supported_Toolchains_display = ','.join(Supported_Toolchains)
 
 Default_CXX = {'linux': 'g++',
                'darwin': 'clang++',
-               'bigred2': 'g++'}
+               'bigred2': 'g++',
+               'msys2': 'g++'}
+
+def detect_os():
+    """Return configure OS id: linux, darwin, bigred2, or msys2."""
+    msystem = os.environ.get('MSYSTEM', '')
+    if msystem in ('MINGW64', 'UCRT64', 'CLANG64', 'MINGW32', 'CLANG32'):
+        return 'msys2'
+    uname = os.environ.get('MSYSTEM_PREFIX', '')
+    if uname and ('mingw' in uname.lower() or 'ucrt' in uname.lower()):
+        return 'msys2'
+    system = platform.system().lower()
+    if system == 'windows':
+        sys.exit(
+            "Native Windows shell detected. Use MSYS2 UCRT64 (or MINGW64) bash:\n"
+            "  pacman -S mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-qt5 "
+            "mingw-w64-ucrt-x86_64-gsl mingw-w64-ucrt-x86_64-python python-is-python3 make\n"
+            "  cd /c/path/to/polyworld && ./configure --os msys2 && make app"
+        )
+    return system
 
 ######################################################################
 #
@@ -61,7 +80,7 @@ def main():
     # Determine OS
     #
     if not config['os']:
-        config['os'] = platform.system().lower()
+        config['os'] = detect_os()
     else:
         config['os'] = config['os'][0]
 
@@ -71,7 +90,7 @@ def main():
     print('Operating System:', config['os'])
 
     #
-    # Determine compiler
+    # Determine compile
     #
     if not config['cxx']:
         config['cxx'] = Default_CXX[config['os']]
@@ -81,6 +100,23 @@ def main():
 
     if not check_exit('which '+config['cxx']):
         sys.exit('Cannot locate compiler')
+
+    if config['os'] == 'msys2' and not check_exit('which make'):
+        if check_exit('which mingw32-make'):
+            bindir = msys2_path_prefix()
+            if bindir and os.path.isfile(bindir + '/mingw32-make.exe'):
+                print('Note: creating make -> mingw32-make symlink in', bindir)
+                try:
+                    makepath = bindir + '/make.exe'
+                    if os.path.lexists(makepath):
+                        os.remove(makepath)
+                    os.symlink('mingw32-make.exe', makepath)
+                except OSError as e:
+                    sys.exit('Cannot create make.exe symlink: ' + str(e))
+            else:
+                sys.exit('Cannot locate make (run: ln -sf /ucrt64/bin/mingw32-make.exe /ucrt64/bin/make.exe)')
+        else:
+            sys.exit('Cannot locate make (pacman -S mingw-w64-ucrt-x86_64-make)')
 
     if 'clang' in config['cxx']:
         config['toolchain'] = 'llvm'
@@ -96,7 +132,12 @@ def main():
     else:
         config['qmake'] = config['qmake'][0]
     if not check_exit('which '+config['qmake']):
-        sys.exit('Cannot locate qmake')
+        for fallback in ('qmake-qt5', 'qmake'):
+            if fallback != config['qmake'] and check_exit('which '+fallback):
+                config['qmake'] = fallback
+                break
+        else:
+            sys.exit('Cannot locate qmake (MSYS2: pacman -S qt5-tools; ln -sf /ucrt64/bin/qmake-qt5.exe /ucrt64/bin/qmake.exe)')
     print('QMake:', config['qmake'])
 
     #
@@ -135,9 +176,25 @@ def main():
 # Run cmd in bash and return True if succeeded (output not shown)
 #
 ######################################################################
+def msys2_path_prefix():
+    prefix = os.environ.get('MSYSTEM_PREFIX', '')
+    if prefix:
+        return prefix.replace('\\', '/') + '/bin'
+    if os.path.isdir('/ucrt64/bin'):
+        return '/ucrt64/bin'
+    return ''
+
 def check_exit(cmd):
     try:
-        subprocess.check_output(['bash', '-c', cmd], stderr=subprocess.STDOUT)
+        env = os.environ.copy()
+        bindir = msys2_path_prefix()
+        if bindir:
+            env['PATH'] = bindir + os.pathsep + env.get('PATH', '')
+        subprocess.check_output(
+            ['bash', '-c', cmd],
+            stderr=subprocess.STDOUT,
+            env=env,
+        )
         return True
     except:
         return False

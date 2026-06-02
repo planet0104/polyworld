@@ -11,20 +11,25 @@ def write_response(success, text):
     sys.stdout.buffer.flush()
 
 
+def read_line():
+    # Windows pipe text mode may turn '\n' into '\r\n'; strip both ends.
+    return sys.stdin.readline().rstrip('\r\n')
+
+
 while True:
-    header = sys.stdin.readline()
-    if header == "exit\n":
+    header = read_line()
+    if header == "exit":
         break
 
-    assert header == "<expr>\n"
+    assert header == "<expr>", repr(header)
 
     expr = []
     while True:
-        line = sys.stdin.readline()
-        if line == "</expr>\n":
+        line = read_line()
+        if line == "</expr>":
             break
         else:
-            expr.append(line)
+            expr.append(line + '\n')
 
     expr = ''.join(expr)
 

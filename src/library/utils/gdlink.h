@@ -79,7 +79,7 @@ public: /* for debugging only */
 	}
 	int isempty() { return lastItem == 0; }  /*lsy*/		
 	void clear();	
-	~gdlist<TTYPE>() { clear(); };			
+	~gdlist() { clear(); };			
 	
 	/* set current pointer to 0 */			
 	void reset() { currItem = 0; }  /*lsy*/			

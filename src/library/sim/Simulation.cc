@@ -34,9 +34,9 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/errno.h>
 #include <dirent.h>
 #include <assert.h>
 

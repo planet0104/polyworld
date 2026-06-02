@@ -18,7 +18,10 @@
 #if __APPLE__
 	#include <mach/mach_time.h>
 	#include <libkern/OSByteOrder.h>
-#else	// #elif linux
+#elif defined(_WIN32) && !defined(__CYGWIN__)
+	#include <winsock2.h>
+	#include <windows.h>
+#else
 	#include <byteswap.h>
 	#include <netinet/in.h>
 	#include <sys/time.h>
@@ -63,7 +66,10 @@ using namespace std;
 #if __APPLE__
 	#define SwapInt32(x) OSSwapInt32(x)
 	#define SwapInt16(x) OSSwapInt16(x)
-#else	// #elif linux
+#elif defined(_WIN32) && !defined(__CYGWIN__)
+	#define SwapInt32(x) ((uint32_t)_byteswap_ulong((unsigned long)(x)))
+	#define SwapInt16(x) ((uint16_t)_byteswap_ushort((unsigned short)(x)))
+#else
 	#define SwapInt32(x) bswap_32(x)
 	#define SwapInt16(x) bswap_16(x)
 #endif
@@ -1205,14 +1211,21 @@ char* sgets( char* string, size_t size, FILE* file )
 
 double hirestime( void )
 {
-#ifdef __linux__
+#if defined(__linux__)
 
 	struct timeval tv;
 	gettimeofday( &tv, NULL );
 
 	return (double)tv.tv_sec + (double)tv.tv_usec/1000000.0;
 
-#else /* this seems to be Apple-specific, referencing "mach"... */
+#elif defined(_WIN32) && !defined(__CYGWIN__)
+
+	LARGE_INTEGER freq, counter;
+	QueryPerformanceFrequency( &freq );
+	QueryPerformanceCounter( &counter );
+	return (double)counter.QuadPart / (double)freq.QuadPart;
+
+#elif defined(__APPLE__)
 
     static uint32_t num = 0;
     static uint32_t denom = 0;
@@ -1231,6 +1244,8 @@ double hirestime( void )
     now = mach_absolute_time();
     return (double)(now * (double)num / denom / NSEC_PER_SEC);
 
+#else
+	#error hirestime: unsupported platform
 #endif
 }
 

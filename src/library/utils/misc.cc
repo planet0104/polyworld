@@ -9,6 +9,10 @@
 // Self
 #include "misc.h"
 
+#ifndef PWHOME
+#define PWHOME "."
+#endif
+
 // System
 
 #ifdef __APPLE__
@@ -20,10 +24,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <direct.h>
+#include <windows.h>
+#endif
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/resource.h>
+#endif
 #include <set>
 #include <string>
 #include <vector>
@@ -199,6 +209,119 @@ string dirname( const string &path )
     return path.substr( 0, end );
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+static string pwNormalizeSlashes( string path )
+{
+	for( size_t i = 0; i < path.size(); ++i )
+	{
+		if( path[i] == '\\' )
+			path[i] = '/';
+	}
+	return path;
+}
+
+static bool pwPathExists( const string &path )
+{
+	return GetFileAttributesA( path.c_str() ) != INVALID_FILE_ATTRIBUTES;
+}
+
+static string pwMsysRoot()
+{
+	if( const char *prefix = getenv( "MSYSTEM_PREFIX" ) )
+	{
+		string p = pwNormalizeSlashes( prefix );
+		const string marker = "msys64";
+		size_t pos = p.find( marker );
+		if( pos != string::npos )
+			return p.substr( 0, pos + marker.size() );
+	}
+	return "C:/msys64";
+}
+
+static string pwMsysBashPath()
+{
+	string bash = pwMsysRoot() + "/usr/bin/bash.exe";
+	if( pwPathExists( bash ) )
+		return bash;
+	return "C:/msys64/usr/bin/bash.exe";
+}
+
+// MSYS bash expects POSIX paths (/ucrt64/bin), not C:/msys64/ucrt64/bin.
+static string pwMsysToolBinPath()
+{
+	if( const char *prefix = getenv( "MSYSTEM_PREFIX" ) )
+	{
+		string p = pwNormalizeSlashes( prefix );
+		if( !p.empty() && p[0] == '/' )
+			return p + "/bin";
+		const string marker = "msys64/";
+		size_t pos = p.find( marker );
+		if( pos != string::npos )
+		{
+			size_t start = pos + marker.size();
+			size_t slash = p.find( '/', start );
+			string env = (slash == string::npos) ? p.substr( start ) : p.substr( start, slash - start );
+			return "/" + env + "/bin";
+		}
+	}
+	return "/ucrt64/bin";
+}
+
+int pwSystem( const char *cmd )
+{
+	string bash = pwMsysBashPath();
+	if( !pwPathExists( bash ) )
+		return system( cmd );
+
+	string script = string( "export PATH=\"" ) + pwMsysToolBinPath()
+		+ ":/usr/bin:$PATH\" && cd \"" + pwNormalizeSlashes( PWHOME )
+		+ "\" && " + cmd;
+
+	string line = bash + " -lc \"" + script + "\"";
+	return system( line.c_str() );
+}
+
+static bool pwCreateDirIfNeeded( const string &path )
+{
+	if( path.empty() || exists( path ) )
+		return true;
+	if( 0 == _mkdir( path.c_str() ) )
+		return true;
+	return errno == EEXIST;
+}
+
+static bool pwMakeDirsRecursive( const string &pathIn )
+{
+	if( pathIn.empty() )
+		return true;
+
+	string path = pathIn;
+	for( size_t i = 0; i < path.size(); ++i )
+	{
+		if( path[i] == '\\' )
+			path[i] = '/';
+	}
+
+	size_t pos = 0;
+	if( path.size() >= 2 && path[1] == ':' )
+		pos = 2;
+
+	for( ;; )
+	{
+		size_t slash = path.find( '/', pos );
+		string sub = (slash == string::npos) ? path : path.substr( 0, slash );
+
+		if( !sub.empty() && sub != "." && !pwCreateDirIfNeeded( sub ) )
+			return false;
+
+		if( slash == string::npos )
+			break;
+		pos = slash + 1;
+	}
+	return true;
+}
+#endif
+
 void makeDirs( const string &path )
 {
     static set<string> alreadyMade;
@@ -209,10 +332,15 @@ void makeDirs( const string &path )
 
 		if( alreadyMade.find(path) == alreadyMade.end() )
 		{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			if( !pwMakeDirsRecursive( path ) )
+				exit( 1 );
+#else
 			char cmd[1024];
 			sprintf( cmd, "mkdir -p %s", path.c_str() );
 			if( 0 != system(cmd) )
 				exit( 1 );
+#endif
 
 			alreadyMade.insert( path );
 		}
@@ -226,6 +354,10 @@ void makeParentDir( const string &path )
 
 int SetMaximumFiles( long filecount )
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	(void)filecount;
+	return 0;
+#else
     struct rlimit lim;
 
 	lim.rlim_cur = lim.rlim_max = (rlim_t) filecount;
@@ -233,10 +365,15 @@ int SetMaximumFiles( long filecount )
 		return 0;
 	else
 		return errno;
+#endif
 }
 
 int GetMaximumFiles( long *filecount )
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	*filecount = 512;
+	return 0;
+#else
 	struct rlimit lim;
 
 	if( getrlimit( RLIMIT_NOFILE, &lim ) == 0 )
@@ -246,6 +383,7 @@ int GetMaximumFiles( long *filecount )
 	}
 	else
 		return errno;
+#endif
 }
 
 

@@ -15,6 +15,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// MinGW math.h omits M_PI unless _GNU_SOURCE; provide fallbacks.
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include "pw_rand48.h"
+#endif
+
 #include <string>
 #include <vector>
 
@@ -132,7 +144,12 @@ std::vector<std::string> split( const std::string& str, const std::string& delim
 #endif
 
 #define SYS(STMT) {int rc = STMT; if(rc == -1) perror(#STMT);}
+#if defined(_WIN32) && !defined(__CYGWIN__)
+int pwSystem( const char *cmd );
+#define SYSTEM(cmd) {int rc = pwSystem(cmd); if(rc != 0) {fprintf(stderr, "Failed executing command '%s'\n", cmd); exit(1);}}
+#else
 #define SYSTEM(cmd) {int rc = system(cmd); if(rc != 0) {fprintf(stderr, "Failed executing command '%s'\n", cmd); exit(1);}}
+#endif
 
 #define PANIC() { fprintf(stderr, "PANIC! [%s:%d]\n", __FILE__, __LINE__); abort(); }
 #define ERR(MSG...) {fprintf(stderr, MSG); fprintf(stderr, "\n"); exit(1);}

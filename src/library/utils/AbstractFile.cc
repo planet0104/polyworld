@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#endif
+
 #define GZIP_EXT ".gz"
 
 AbstractFile *AbstractFile::open( ConcreteFileType type,
@@ -90,7 +94,11 @@ int AbstractFile::link( const char *oldAbstractPath,
 			char *oldpath = createPath( type, oldAbstractPath );
 			char *newpath = createPath( type, newAbstractPath );
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			rc = CreateHardLinkA( newpath, oldpath, NULL ) ? 0 : -1;
+#else
 			rc = ::link( oldpath, newpath );
+#endif
 
 			free( oldpath );
 			free( newpath );

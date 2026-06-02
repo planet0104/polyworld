@@ -1,9 +1,12 @@
 #include "cppprops.h"
 
 #include <assert.h>
-#include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#endif
 
 #include <fstream>
 #include <sstream>
@@ -13,6 +16,11 @@
 #include "interpreter.h"
 #include "parser.h"
 #include "utils/misc.h"
+#include "utils/pw_dynload.h"
+
+#ifndef PWHOME
+#define PWHOME "."
+#endif
 
 using namespace proplib;
 using namespace std;
@@ -67,20 +75,41 @@ void CppProperties::init( Document *doc, UpdateContext *context )
 
 	generateLibrarySource();
 
-    SYSTEM("cp " PWHOME "/etc/bld/cppprops.mak " GENDIR "/Makefile && export conf=" PWHOME "/Makefile.conf && make -C " GENDIR);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	{
+		string srcMak = string( PWHOME ) + "/etc/bld/cppprops.mak";
+		string dstMak = string( PWHOME ) + "/" GENDIR "/Makefile";
+		if( !CopyFileA( srcMak.c_str(), dstMak.c_str(), FALSE ) )
+			ERR( "Failed copying %s to %s", srcMak.c_str(), dstMak.c_str() );
 
-	void *libHandle = dlopen( GENLIB, RTLD_LAZY );
-	ERRIF( !libHandle, "Failed opening " GENLIB );
+		string mkcmd = string( "export conf=\"" ) + string( PWHOME )
+			+ "/Makefile.conf\" && make -C " GENDIR;
+		if( pwSystem( mkcmd.c_str() ) != 0 )
+			ERR( "make -C %s failed", GENDIR );
+	}
+#else
+	SYSTEM("cp " PWHOME "/etc/bld/cppprops.mak " GENDIR "/Makefile && export conf=" PWHOME "/Makefile.conf && make -C " GENDIR);
+#endif
+
+	string genlib = string( PWHOME ) + "/runs/run/.cppprops/libcppprops.dll";
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	string pwlibdir = string( PWHOME ) + "/lib";
+	SetDllDirectoryA( pwlibdir.c_str() );
+	LoadLibraryA( ( pwlibdir + "/libpolyworld.dll" ).c_str() );
+#endif
+	ERRIF( !exists( genlib ), "cppprops build did not create %s", genlib.c_str() );
+	void *libHandle = pw_dlopen( genlib.c_str() );
+	ERRIF( !libHandle, "Failed opening %s", genlib.c_str() );
 
 	typedef void (*LibraryInit)( UpdateContext *context );
-	LibraryInit init = (LibraryInit)dlsym( libHandle, "__clink__CppProperties_Init" );
-	ERRIF( dlerror() != NULL, "%s", dlerror() );
+	LibraryInit init = (LibraryInit)pw_dlsym( libHandle, "__clink__CppProperties_Init" );
+	ERRIF( !init, "%s", pw_dlerror() );
 
-	_update = (LibraryUpdate)dlsym( libHandle, "__clink__CppProperties_Update" );
-	ERRIF( dlerror() != NULL, "%s", dlerror() );
+	_update = (LibraryUpdate)pw_dlsym( libHandle, "__clink__CppProperties_Update" );
+	ERRIF( !_update, "%s", pw_dlerror() );
 
-	_getMetadata = (LibraryGetMetadata)dlsym( libHandle, "__clink__CppProperties_GetMetadata" );
-	ERRIF( dlerror() != NULL, "%s", dlerror() );
+	_getMetadata = (LibraryGetMetadata)pw_dlsym( libHandle, "__clink__CppProperties_GetMetadata" );
+	ERRIF( !_getMetadata, "%s", pw_dlerror() );
 
 	init( context );
 }
@@ -121,7 +150,7 @@ void CppProperties::generateLibrarySource()
 		}
 	}
 
-	SYSTEM( "mkdir -p " GENDIR);
+	makeDirs( GENDIR );
 	ofstream out( GENSRC );
 
 	l( "// This file is machine-generated. See " << __FILE__ );

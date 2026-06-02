@@ -10,7 +10,8 @@ qt_project=./.qt.pro
 qt_makefile=./.qt.mak
 
 qt_modules=gui opengl core
-cxxflags=${CXXFLAGS} ${LIBRARY_CXXFLAGS} ${OMP_CXXFLAGS} ${OPENGL_CXXFLAGS}
+qt_cxxflags=$(filter-out -c,${CXXFLAGS}) ${LIBRARY_CXXFLAGS} ${OMP_CXXFLAGS} ${OPENGL_CXXFLAGS}
+qt_sources=$(wildcard renderer/*.cc renderer/qt/*.cc)
 libs=${PWLIB_LDFLAGS} ${LIBRARY_LIBS} ${OMP_LIBS} ${OPENGL_LIBS}
 
 .PHONY: ${qt_project} ${qt_makefile} qt_build clean
@@ -34,12 +35,14 @@ ${qt_project}:
 	@echo "QT = ${qt_modules}" >> $@
 	@echo "QMAKE_CXX=${CXX}" >> $@
 	@echo "QMAKE_LINK=${LD}" >> $@
-	@echo "QMAKE_CXXFLAGS += ${cxxflags}" >> $@
+	@echo "QMAKE_CXXFLAGS += ${qt_cxxflags}" >> $@
 	@echo "QMAKE_LFLAGS_SONAME = ${QMAKE_LFLAGS_SONAME}" >> $@
+	@echo "QMAKE_LFLAGS += -Wl,--export-all-symbols" >> $@
 	@echo "DEPENDPATH += ${LIBRARY_SRC}" >> $@
+	@echo "INCLUDEPATH += $(MSYS2_UCRT)/include/GL" >> $@
 	@echo "LIBS += ${libs}" >> $@
-	@echo "SOURCES += $(shell find . -name '*.cc')" >> $@
-	@echo "HEADERS += $(shell find . -name '*.h')" >> $@
+	@echo "SOURCES += ${qt_sources}" >> $@
+	@echo "HEADERS += $(wildcard renderer/*.h renderer/qt/*.h)" >> $@
 	@echo "TARGET = ${target_name}" >> $@
 	@echo "DESTDIR = $(shell dirname ${target})" >> $@
 	@echo "OBJECTS_DIR = ${blddir}" >> $@

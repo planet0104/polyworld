@@ -10,8 +10,11 @@ qt_project=./.qt.pro
 qt_makefile=./.qt.mak
 
 qt_modules=gui opengl core
-cxxflags=${CXXFLAGS} ${LIBRARY_CXXFLAGS} ${QTRENDERER_CXXFLAGS} ${OMP_CXXFLAGS} ${OPENGL_CXXFLAGS}
-libs=${PWLIB_LDFLAGS} ${LIBRARY_LIBS} ${QTRENDERER_LIBS} ${OMP_LIBS} ${OPENGL_LIBS}
+# Do not pass -c to qmake (library Makefile.conf adds it for sub-makes only).
+qt_cxxflags=$(filter-out -c,${CXXFLAGS}) ${LIBRARY_CXXFLAGS} ${QTRENDERER_CXXFLAGS} ${OMP_CXXFLAGS} ${OPENGL_CXXFLAGS}
+app_sources=$(wildcard main.cc ui/*.cc ui/gui/*.cc ui/term/*.cc)
+app_headers=$(wildcard ui/gui/*.h ui/*.h ui/term/*.h)
+libs=${PWLIB_LDFLAGS} ${LIBRARY_LIBS} ${QTRENDERER_LIBS} ${OMP_LIBS} ${OPENGL_LIBS} ${PWLIB_EXTRA_LIBS}
 
 .PHONY: ${qt_project} ${qt_makefile} qt_build clean
 
@@ -34,12 +37,13 @@ ${qt_project}:
 	@echo "QT = ${qt_modules}" >> $@
 	@echo "QMAKE_CXX=${CXX}" >> $@
 	@echo "QMAKE_LINK=${LD}" >> $@
-	@echo "QMAKE_CXXFLAGS += ${cxxflags}" >> $@
+	@echo "QMAKE_CXXFLAGS += ${qt_cxxflags}" >> $@
 	@echo "DEPENDPATH += ${LIBRARY_SRC}" >> $@
 	@echo "DEPENDPATH += ${QTRENDERER_SRC}" >> $@
+	@echo "INCLUDEPATH += $(MSYS2_UCRT)/include/GL" >> $@
 	@echo "LIBS += ${libs}" >> $@
-	@echo "SOURCES += $(shell find . -name '*.cc')" >> $@
-	@echo "HEADERS += $(shell find . -name '*.h')" >> $@
+	@echo "SOURCES += ${app_sources}" >> $@
+	@echo "HEADERS += ${app_headers}" >> $@
 	@echo "TARGET = ${target_name}" >> $@
 	@echo "DESTDIR = $(shell dirname ${target})" >> $@
 	@echo "OBJECTS_DIR = ${blddir}" >> $@
