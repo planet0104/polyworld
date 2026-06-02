@@ -122,6 +122,7 @@ bash scripts/build-msys2.sh
 必须在 **polyworld 根目录**（有 `etc/`、`worldfiles/` 的目录）：
 
 ```bash
+cd /c/Users/glsa-/Documents/GitHub/neat_thinking_unit/Polyworld/polyworld
 export PATH="/ucrt64/bin:$PATH"
 export PATH="$PWD/lib:$PATH"
 ./Polyworld.exe worldfiles/tests/low-spec-pc/minitest.wf
@@ -130,6 +131,7 @@ export PATH="$PWD/lib:$PATH"
 也可一行：
 
 ```bash
+cd /c/Users/glsa-/Documents/GitHub/neat_thinking_unit/Polyworld/polyworld
 export PATH="$PWD/lib:/ucrt64/bin:$PATH"
 ./Polyworld.exe worldfiles/tests/low-spec-pc/minitest.wf
 ```
