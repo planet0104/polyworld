@@ -114,13 +114,23 @@ bash scripts/build-msys2.sh
 **编译**必须在 UCRT64（或同等 MinGW 环境）里完成。**运行**不强制 UCRT64：在 **cmd / PowerShell** 里也可以，只要：
 
 1. 当前目录是 **polyworld 根目录**（含 `etc/`、`worldfiles/`、`lib/`）
-2. `PATH` 包含 `polyworld\lib`，以及 MSYS2 的 `C:\msys64\ucrt64\bin`（Qt、Python、其它 DLL）
+2. `PATH` 同时包含 **`polyworld/lib`** 与 **`/ucrt64/bin`**（或 `C:\msys64\ucrt64\bin`）：前者有 `libpolyworld.dll`、`pwqtrenderer.dll`；后者有 Qt、Python、GSL 等
 3. 从 UCRT64 启动最省事（PATH、Python 已配好）
+
+**首次启动**会在 `runs/run/.cppprops/` 里根据 worldfile **自动编译** `libcppprops.dll`（约 10–20 秒），属正常，不要中断。
 
 必须在 **polyworld 根目录**（有 `etc/`、`worldfiles/` 的目录）：
 
 ```bash
+export PATH="/ucrt64/bin:$PATH"
 export PATH="$PWD/lib:$PATH"
+./Polyworld.exe worldfiles/tests/low-spec-pc/minitest.wf
+```
+
+也可一行：
+
+```bash
+export PATH="$PWD/lib:/ucrt64/bin:$PATH"
 ./Polyworld.exe worldfiles/tests/low-spec-pc/minitest.wf
 ```
 
@@ -203,14 +213,17 @@ pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-toolchain
 | Python `AssertionError`（`header` 为 `''` 或 `'<expr>\\r'`） | 须用 `MSYS2_PREFIX/bin/python3.exe` 起子进程；`interpreter.py` 已 `strip`；重编 `libpolyworld.dll` |
 | 启动时乱码 `Ŀ¼... -p ... runs ...` 后立刻退出 | Windows 上勿用 `mkdir -p`（会走 cmd）；已改 `makeDirs` 用 `_mkdir`；`make -C src/library` 后重跑 |
 | `Failed executing command 'mkdir -p runs/run/.cppprops'` | 勿用 cmd 的 `mkdir -p`；已改 `makeDirs` + MSYS `bash` 编 `libcppprops.dll`；**必须**重编 `libpolyworld.dll`（`make` 显示 up to date 时先 `rm .bld/library/utils/misc.o .bld/library/proplib/cppprops.o` 再 `make -C src/library`） |
-| `Failed opening ... libcppprops.dll` / `libpwqtrenderer.dll` | 运行前 `export PATH="$PWD/lib:/ucrt64/bin:$PATH"`；首次启动会在 `runs/run/.cppprops` 自动 `make` 约 10–20 秒 |
+| `Failed opening ... libcppprops.dll` | 确认已用**新** `libpolyworld.dll`；`PATH` 含 `$PWD/lib`；见上节强制重编 |
+| `Failed opening ... libpwqtrenderer.dll` / `pwqtrenderer.dll` | 确认 `lib/pwqtrenderer.dll` 存在（`make app` 会生成）；`PATH` 含 `$PWD/lib` |
+| `make` 显示 up to date 但运行仍报旧错误 | 强制重编库：`rm -f .bld/library/utils/misc.o .bld/library/proplib/cppprops.o .bld/library/utils/pw_renderer_win.o && make -C src/library` |
 | `Cannot locate qmake` 第二次 configure | 已有 `qmake` 软链时用 `./configure --os msys2` 即可，勿重复 `--qmake qmake-qt5` |
-| 链接错误 `fork` | 见下节，需后续补丁 |
 
 ---
 
 ## 5. 已知限制
 
-`interpreter.cc` 使用 Linux 的 `fork()` 启动 Python。MinGW 上可能 **链接失败** 或 **运行失败**。若编译/运行卡在这里，把完整报错发出来，或暂时继续用 **WSL** 跑仿真。
+- **完整构建**需 `make app`（含 `qtrenderer`）；仅 `make -C src/library` 不够运行 GUI。
+- **cppprops** 每次新 `runs/run` 可能重新 `make`；依赖 MSYS2 的 `bash` 与 `/ucrt64/bin` 里的 `g++`、`make`（程序内通过 `pwSystem` 调用）。
+- 若 worldfile / Python 子进程仍异常，可暂时用 **WSL** 对照；多数启动问题已按 Windows 路径修过。
 
-更完整说明见 `docs/WINDOWS_BUILD.md`。
+更完整说明见 `docs/WINDOWS_BUILD.md`（若存在）。
