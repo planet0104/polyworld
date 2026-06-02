@@ -127,7 +127,7 @@ void Retina::updateBuffer( short x, short y,
 	static FILE* pixelFile = NULL;
 	if( pixelFile == NULL )
 	{
-		pixelFile = fopen( "run/pixels.txt", "w");
+		pixelFile = fopen( "runs/run/pixels.txt", "w");
 		if( !pixelFile )
 		{
 			fprintf( stderr, "Unable to open pixels.txt\n" );

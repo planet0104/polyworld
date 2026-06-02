@@ -208,8 +208,8 @@ void agent::ReadSeedSynapseFilePaths()
 		exit( 1 );
 	}
 
-	makeDirs( "run/brain" );
-	SYSTEM( "cp synapseSeeds.txt run/brain" );
+	makeDirs( "runs/run/brain" );
+	SYSTEM( "cp synapseSeeds.txt runs/run/brain" );
 
 	char buf[1024 * 4];
 	while( !in.eof() )

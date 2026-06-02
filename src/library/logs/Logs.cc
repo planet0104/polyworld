@@ -134,10 +134,10 @@ void Logs::AdamiComplexityLog::processEvent( const StepEndEvent &e )
 {
 	if( getStep() % _frequency == 0 )
 	{
-		FILE *FileOneBit = createFile( "run/genome/AdamiComplexity-1bit.txt", "a" );
-		FILE *FileTwoBit = createFile( "run/genome/AdamiComplexity-2bit.txt", "a" );
-		FILE *FileFourBit = createFile( "run/genome/AdamiComplexity-4bit.txt", "a" );
-		FILE *FileSummary = createFile( "run/genome/AdamiComplexity-summary.txt", "a" );
+		FILE *FileOneBit = createFile( "runs/run/genome/AdamiComplexity-1bit.txt", "a" );
+		FILE *FileTwoBit = createFile( "runs/run/genome/AdamiComplexity-2bit.txt", "a" );
+		FILE *FileFourBit = createFile( "runs/run/genome/AdamiComplexity-4bit.txt", "a" );
+		FILE *FileSummary = createFile( "runs/run/genome/AdamiComplexity-summary.txt", "a" );
 
 		computeAdamiComplexity( getStep(),
 								FileOneBit,
@@ -183,7 +183,7 @@ void Logs::AgentEnergyLog::processEvent( const sim::AgentBirthEvent &e )
 
 	char path[512];
 	sprintf( path,
-			 "run/energy/agents/agent_%ld.txt",
+			 "runs/run/energy/agents/agent_%ld.txt",
 			 e.a->getTypeNumber() );
 
 	DataLibWriter *writer = createWriter( e.a, path, true, false );
@@ -252,7 +252,7 @@ void Logs::AgentMaxEnergyLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_AgentGrown );
 
-		createWriter( "run/energy/agents/max.txt" );
+		createWriter( "runs/run/energy/agents/max.txt" );
 
 		const char *colnames[] =
 			{
@@ -319,7 +319,7 @@ void Logs::AgentPositionLog::processEvent( const sim::AgentBirthEvent &e )
 
 	char path[512];
 	sprintf( path,
-			 "run/motion/position/agents/position_%ld.txt",
+			 "runs/run/motion/position/agents/position_%ld.txt",
 			 e.a->getTypeNumber() );
 
 	switch( _mode )
@@ -403,7 +403,7 @@ void Logs::BirthsDeathsLog::init( TSimulation *sim, Document *doc )
 					   sim::Event_AgentBirth
 					   | sim::Event_AgentDeath );
 
-		createFile( "run/BirthsDeaths.log" );
+		createFile( "runs/run/BirthsDeaths.log" );
 		fprintf( getFile(), "%% Timestep Event Agent# Parent1 Parent2\n" );
 	}
 }
@@ -537,7 +537,7 @@ void Logs::BrainAnatomyLog::processEvent( const EpochEndEvent &e )
 void Logs::BrainAnatomyLog::createAnatomyFile( agent *a, const char *suffix, float fitness )
 {
 	char path[256];
-	sprintf( path, "run/brain/anatomy/brainAnatomy_%ld_%s.txt", a->Number(), suffix );
+	sprintf( path, "runs/run/brain/anatomy/brainAnatomy_%ld_%s.txt", a->Number(), suffix );
 
 	AbstractFile *file = createFile( path );
 	a->GetBrain()->dumpAnatomical( file, a->Number(), fitness );
@@ -552,7 +552,7 @@ void Logs::BrainAnatomyLog::recordEpochFittest( long step, sim::FitnessScope sco
 	char s[256];
 	FittestList *fittest = _simulation->getFittest( scope );
 
-	sprintf( s, "run/brain/%s/%ld", scopeName, step );
+	sprintf( s, "runs/run/brain/%s/%ld", scopeName, step );
 	makeDirs( s );
 	for( int i = 0; i < fittest->size(); i++ )
 	{
@@ -561,8 +561,8 @@ void Logs::BrainAnatomyLog::recordEpochFittest( long step, sim::FitnessScope sco
 		for( const char **prefix = prefixes; *prefix; prefix++ )
 		{
 			char t[256];	// target (use s for source)
-			sprintf( s, "run/brain/anatomy/brainAnatomy_%ld_%s.txt", fittest->get(i)->agentID, *prefix );
-			sprintf( t, "run/brain/%s/%ld/%d_brainAnatomy_%ld_%s.txt", scopeName, step, i, fittest->get(i)->agentID, *prefix );
+			sprintf( s, "runs/run/brain/anatomy/brainAnatomy_%ld_%s.txt", fittest->get(i)->agentID, *prefix );
+			sprintf( t, "runs/run/brain/%s/%ld/%d_brainAnatomy_%ld_%s.txt", scopeName, step, i, fittest->get(i)->agentID, *prefix );
 			if( AbstractFile::exists( s ) )
 				AbstractFile::link( s, t );
 		}
@@ -667,7 +667,7 @@ void Logs::BrainComplexityLog::writeComplexityFile( long epoch, ComplexityMap &c
 		};
 
 	char path[256];
-	sprintf( path, "run/brain/Recent/%ld/complexity_%s.plt", epoch, _complexityType.c_str() );
+	sprintf( path, "runs/run/brain/Recent/%ld/complexity_%s.plt", epoch, _complexityType.c_str() );
 
 	DataLibWriter *writer = createWriter( path );
 
@@ -721,7 +721,7 @@ void Logs::BrainComplexityLog::writeBestRecent( long epoch )
 	stddev = sqrt(stddev / (count-1) );		// note that this stddev is divided by N-1 (MATLAB default)
 	double StandardError = stddev / sqrt(count);
 
-	const char *path = "run/brain/bestRecent/complexity.txt";
+	const char *path = "runs/run/brain/bestRecent/complexity.txt";
 	makeParentDir( path );
 	FILE *cFile = fopen( path, "a" );
 	if( !cFile ) { perror( path ); exit( 1 ); }
@@ -778,7 +778,7 @@ void Logs::BrainFunctionLog::init( TSimulation *sim, Document *doc )
 void Logs::BrainFunctionLog::processEvent( const AgentGrownEvent &e )
 {
 	char path[256];
-	sprintf( path, "run/brain/function/incomplete_brainFunction_%ld.txt", e.a->Number() );
+	sprintf( path, "runs/run/brain/function/incomplete_brainFunction_%ld.txt", e.a->Number() );
 
 	AbstractFile *file = createFile( e.a, path );
 	e.a->GetBrain()->startFunctional( file, e.a->Number() );
@@ -809,8 +809,8 @@ void Logs::BrainFunctionLog::processEvent( const BrainAnalysisBeginEvent &e )
 
 	char s[256];
 	char t[256];
-	sprintf( s, "run/brain/function/incomplete_brainFunction_%ld.txt", e.a->Number() );
-	sprintf( t, "run/brain/function/brainFunction_%ld.txt", e.a->Number() );
+	sprintf( s, "runs/run/brain/function/incomplete_brainFunction_%ld.txt", e.a->Number() );
+	sprintf( t, "runs/run/brain/function/brainFunction_%ld.txt", e.a->Number() );
 	AbstractFile::rename( s, t );
 
 	// Simulation needs this path for calculating complexity.
@@ -818,13 +818,13 @@ void Logs::BrainFunctionLog::processEvent( const BrainAnalysisBeginEvent &e )
 
 	if( _recordRecent )
 	{
-		sprintf( s, "run/brain/Recent/%ld/brainFunction_%ld.txt", _simulation->getEpoch(), e.a->Number() );
+		sprintf( s, "runs/run/brain/Recent/%ld/brainFunction_%ld.txt", _simulation->getEpoch(), e.a->Number() );
 		makeParentDir( s );
 		AbstractFile::link( t, s );
 
 		if( e.a->Number() <= _nseeds )
 		{
-			sprintf( s, "run/brain/Recent/0/brainFunction_%ld.txt", e.a->Number() );
+			sprintf( s, "runs/run/brain/Recent/0/brainFunction_%ld.txt", e.a->Number() );
 			makeParentDir( s );
 			AbstractFile::link( t, s );
 		}
@@ -862,13 +862,13 @@ void Logs::BrainFunctionLog::recordEpochFittest( long step, sim::FitnessScope sc
 	char s[256];
 	FittestList *fittest = _simulation->getFittest( scope );
 
-	sprintf( s, "run/brain/%s/%ld", scopeName, step );
+	sprintf( s, "runs/run/brain/%s/%ld", scopeName, step );
 	makeDirs( s );
 	for( int i = 0; i < fittest->size(); i++ )
 	{
 		char t[256];	// target (use s for source)
-		sprintf( s, "run/brain/function/brainFunction_%ld.txt", fittest->get(i)->agentID );
-		sprintf( t, "run/brain/%s/%ld/%d_brainFunction_%ld.txt", scopeName, step, i, fittest->get(i)->agentID );
+		sprintf( s, "runs/run/brain/function/brainFunction_%ld.txt", fittest->get(i)->agentID );
+		sprintf( t, "runs/run/brain/%s/%ld/%d_brainFunction_%ld.txt", scopeName, step, i, fittest->get(i)->agentID );
 		AbstractFile::link( s, t );
 	}
 }
@@ -889,7 +889,7 @@ void Logs::CarryLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_Carry );
 
-		DataLibWriter *writer = createWriter( "run/events/carry.log" );
+		DataLibWriter *writer = createWriter( "runs/run/events/carry.log" );
 
 		const char *colnames[] =
 			{
@@ -956,7 +956,7 @@ void Logs::CollisionLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_Collision );
 
-		DataLibWriter *writer = createWriter( "run/events/collisions.log" );
+		DataLibWriter *writer = createWriter( "runs/run/events/collisions.log" );
 
 		const char *colnames[] =
 			{
@@ -1012,7 +1012,7 @@ void Logs::ContactLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_ContactEnd );
 
-		DataLibWriter *writer = createWriter( "run/events/contacts.log" );
+		DataLibWriter *writer = createWriter( "runs/run/events/contacts.log" );
 
 		const char *colnames[] =
 			{
@@ -1135,7 +1135,7 @@ void Logs::EnergyLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_Energy );
 
-		DataLibWriter *writer = createWriter( "run/events/energy.log" );
+		DataLibWriter *writer = createWriter( "runs/run/events/energy.log" );
 
 		const char *colnames_template[] =
 			{
@@ -1220,7 +1220,7 @@ void Logs::FoodConsumptionLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_Energy );
 
-		createWriter( "run/energy/consumption.txt" );
+		createWriter( "runs/run/energy/consumption.txt" );
 
 		const char *colnames[] =
 			{
@@ -1279,7 +1279,7 @@ void Logs::FoodEnergyLog::init( TSimulation *sim, Document *doc )
 					   sim::Event_SimInited
 					   | sim::Event_StepEnd );
 
-		createWriter( "run/energy/food.txt" );
+		createWriter( "runs/run/energy/food.txt" );
 
 		int count = FoodType::getNumberDefinitions();
 		const char **colnames = new const char*[count + 2];
@@ -1365,7 +1365,7 @@ void Logs::GeneStatsLog::init( TSimulation *sim, Document *doc )
 
 		sim->getGeneStats().init( sim->GetMaxAgents() );
 
-		FILE *f = createFile( "run/genome/genestats.txt" );
+		FILE *f = createFile( "runs/run/genome/genestats.txt" );
 
 		fprintf( f, "%d\n", GenomeUtil::schema->getMutableSize() );
 	}
@@ -1418,7 +1418,7 @@ void Logs::GenomeLog::processEvent( const sim::AgentBirthEvent &birth )
 	if( birth.reason != LifeSpan::BR_VIRTUAL )
 	{
 		char path[256];
-		sprintf( path, "run/genome/agents/genome_%ld.txt", birth.a->Number() );
+		sprintf( path, "runs/run/genome/agents/genome_%ld.txt", birth.a->Number() );
 
 		AbstractFile *out = createFile( path );
 		birth.a->Genes()->dump( out );
@@ -1447,30 +1447,30 @@ void Logs::GenomeMetaLog::init( TSimulation *sim, Document *doc )
 void Logs::GenomeMetaLog::processEvent( const sim::SimInitedEvent &birth )
 {
 	{
-		FILE* f = createFile( "run/genome/meta/geneindex.txt" );
+		FILE* f = createFile( "runs/run/genome/meta/geneindex.txt" );
 
 		GenomeUtil::schema->printIndexes( f );
 
 		fclose( f );
 	}
 	{
-		FILE* f = createFile( "run/genome/meta/genelayout.txt" );
+		FILE* f = createFile( "runs/run/genome/meta/genelayout.txt" );
 
 		GenomeUtil::schema->printIndexes( f, GenomeUtil::layout );
 
 		fclose( f );
 
-		SYSTEM( "cat run/genome/meta/genelayout.txt | sort -n > run/genome/meta/genelayout-sorted.txt" );
+		SYSTEM( "cat runs/run/genome/meta/genelayout.txt | sort -n > runs/run/genome/meta/genelayout-sorted.txt" );
 	}
 	{
-		FILE* f = createFile( "run/genome/meta/genetitle.txt" );
+		FILE* f = createFile( "runs/run/genome/meta/genetitle.txt" );
 
 		GenomeUtil::schema->printTitles( f );
 
 		fclose( f );
 	}
 	{
-		FILE* f = createFile( "run/genome/meta/generange.txt" );
+		FILE* f = createFile( "runs/run/genome/meta/generange.txt" );
 
 		GenomeUtil::schema->printRanges( f );
 
@@ -1525,7 +1525,7 @@ void Logs::GenomeSubsetLog::init( TSimulation *sim, Document *doc )
 			coltypes.push_back( datalib::INT );
 		}
 
-		DataLibWriter *writer = createWriter( "run/genome/subset.log" );
+		DataLibWriter *writer = createWriter( "runs/run/genome/subset.log" );
 		writer->beginTable( "GenomeSubset",
 							colnames,
 							coltypes );
@@ -1576,7 +1576,7 @@ void Logs::GitRevisionLog::init( TSimulation *sim, Document *doc )
 //---------------------------------------------------------------------------
 void Logs::GitRevisionLog::processEvent( const sim::SimInitedEvent &birth )
 {
-	SYSTEM( "git rev-parse HEAD > run/gitrevision.txt" );
+	SYSTEM( "git rev-parse HEAD > runs/run/gitrevision.txt" );
 }
 
 
@@ -1593,7 +1593,7 @@ void Logs::LifeSpanLog::init( TSimulation *sim, Document *doc )
 				   SimulationStateScope,
 				   sim::Event_AgentDeath );
 
-	createWriter( "run/lifespans.txt" );
+	createWriter( "runs/run/lifespans.txt" );
 
 	const char *colnames[] =
 		{
@@ -1651,7 +1651,7 @@ void Logs::PopulationLog::init( TSimulation *sim, Document *doc )
 					   SimulationStateScope,
 					   sim::Event_StepEnd );
 
-		createWriter( "run/population.txt" );
+		createWriter( "runs/run/population.txt" );
 
 		const char *colnames[] =
 			{
@@ -1716,7 +1716,7 @@ void Logs::SeparationLog::init( TSimulation *sim, Document *doc )
 			assert(false);
 
 
-		createWriter( "run/genome/separations.txt", false, false );
+		createWriter( "runs/run/genome/separations.txt", false, false );
 	}
 }
 
@@ -1860,7 +1860,7 @@ void Logs::SynapseLog::processEvent( const BrainAnalysisBeginEvent &e )
 void Logs::SynapseLog::createSynapseFile( agent *a, const char *suffix )
 {
 	char path[256];
-	sprintf( path, "run/brain/synapses/synapses_%ld_%s.txt", a->Number(), suffix );
+	sprintf( path, "runs/run/brain/synapses/synapses_%ld_%s.txt", a->Number(), suffix );
 
 	AbstractFile *file = createFile( path );
 	a->GetBrain()->dumpSynapses( file, a->Number() );

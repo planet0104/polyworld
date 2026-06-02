@@ -119,7 +119,7 @@ struct CliParms {
 		neighborCandidateStride = 1;
 		neighborAlgorithm = NA_MEASURE_MEMBERS;
 		neighborAlgorithmName = "measureMembers";
-		path_run = "./run";
+		path_run = "./runs/run";
 		nclusters = -1;
 	}
 } cliParms;

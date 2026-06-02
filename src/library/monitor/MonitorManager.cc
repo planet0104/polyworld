@@ -283,7 +283,7 @@ MonitorManager::MonitorManager( TSimulation *_simulation,
 			// --- Movie Settings
 			// ---
 			bool recordMovie = propScene.get( "Movie" ).get( "Record" );
-			string moviePath = string("run/") + (string)propScene.get( "Movie" ).get( "Path" );
+			string moviePath = string("runs/run/") + (string)propScene.get( "Movie" ).get( "Path" );
 			int sampleFrequency = propScene.get( "Movie" ).get( "SampleFrequency" );
 			int sampleDuration = propScene.get( "Movie" ).get( "SampleDuration" );
 

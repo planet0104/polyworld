@@ -1,6 +1,6 @@
 RecordMovie {
   type    Bool
-  default True
+  default False
 }
 
 ########################################

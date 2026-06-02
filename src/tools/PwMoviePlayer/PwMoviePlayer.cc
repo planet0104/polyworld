@@ -21,13 +21,13 @@
 #define MaxLegendLines 10
 #define MaxLegendLength 80
 
-char defaultMovieFileName[] = "run/movie.pmv";
+char defaultMovieFileName[] = "runs/run/movie.pmv";
 
 int main( int argc, char **argv )
 {
 	/*
 	{
-		PwMovieReader *reader = new PwMovieReader( fopen("run/movie.pmv", "r") );
+		PwMovieReader *reader = new PwMovieReader( fopen("runs/run/movie.pmv", "r") );
 
 		uint32_t timestep;
 		uint32_t width;

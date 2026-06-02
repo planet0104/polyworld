@@ -17,7 +17,7 @@
 using namespace proplib;
 using namespace std;
 
-#define GENDIR "run/.cppprops"
+#define GENDIR "runs/run/.cppprops"
 #define GENSRC GENDIR "/generated.cc"
 #define GENLIB GENDIR "/" CPPPROPS_TARGET
 

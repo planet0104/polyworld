@@ -27,6 +27,7 @@
 
 // Self
 #include "Simulation.h"
+#include "runpaths.h"
 
 // System
 #include <fstream>
@@ -36,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
+#include <dirent.h>
 #include <assert.h>
 
 // Local
@@ -87,6 +89,42 @@ static vector<SheetSynapseType> SheetSynapseTypes =
 //===========================================================================
 
 static long numglobalcreated = 0;    // needs to be static so we only get warned about influence of global creations once ever
+
+// Move legacy run/ and run_* from project root into runs/ (older Polyworld versions).
+static void migrateLegacyRunDirsAtProjectRoot()
+{
+	makeDirs( PW_RUNS_DIR );
+
+	DIR *dir = opendir( "." );
+	if( dir )
+	{
+		struct dirent *ent;
+		while( (ent = readdir( dir )) != NULL )
+		{
+			if( ent->d_name[0] == '.' )
+				continue;
+			if( strncmp( ent->d_name, "run_", 4 ) != 0 )
+				continue;
+
+			struct stat st;
+			if( stat( ent->d_name, &st ) != 0 || !S_ISDIR( st.st_mode ) )
+				continue;
+
+			char dest[512];
+			sprintf( dest, "%s/%s", PW_RUNS_DIR, ent->d_name );
+			(void) rename( ent->d_name, dest );
+		}
+		closedir( dir );
+	}
+
+	struct stat st;
+	if( stat( "run", &st ) == 0 && S_ISDIR( st.st_mode ) )
+	{
+		char dest[256];
+		sprintf( dest, "%s/run_%ld", PW_RUNS_DIR, time( NULL ) );
+		(void) rename( "run", dest );
+	}
+}
 
 long TSimulation::fMaxNumAgents;
 long TSimulation::fStep;
@@ -248,16 +286,13 @@ TSimulation::TSimulation( string worldfilePath, proplib::ParameterMap parameters
 		char s[256];
 		char t[256];
 
-		// First save the old directory, if it exists
-		sprintf( s, "run" );
-		sprintf( t, "run_%ld", time(NULL) );
+		migrateLegacyRunDirsAtProjectRoot();
+
+		sprintf( s, "%s", PW_RUN_DIR );
+		sprintf( t, "%s/run_%ld", PW_RUNS_DIR, time( NULL ) );
 		(void) rename( s, t );
 
-		if( mkdir("run", PwDirMode) )
-		{
-			eprintf( "Error making run directory (%d)\n", errno );
-			exit( 1 );
-		}
+		makeDirs( PW_RUN_DIR );
 	}
 
 	// ---
@@ -271,7 +306,7 @@ TSimulation::TSimulation( string worldfilePath, proplib::ParameterMap parameters
 		worldfile = builder.buildWorldfileDocument( schema, worldfilePath, parameters );
 
 		{
-			ofstream out( "run/converted.wf" );
+			ofstream out( "runs/run/converted.wf" );
 			proplib::DocumentWriter writer( out );
 			writer.write( worldfile );
 		}
@@ -356,7 +391,7 @@ TSimulation::TSimulation( string worldfilePath, proplib::ParameterMap parameters
 			exit(1);
 		}
 
-		SYSTEM( "cp LOCKSTEP-BirthsDeaths.log run/" );		// copy the LOCKSTEP file into the run/ directory.
+		SYSTEM( "cp LOCKSTEP-BirthsDeaths.log runs/run/" );		// copy the LOCKSTEP file into the run directory.
 		SetNextLockstepEvent();								// setup for the first timestep in which Birth/Death events occurred.
 
 	}
@@ -447,11 +482,11 @@ TSimulation::TSimulation( string worldfilePath, proplib::ParameterMap parameters
 	// --- Save worldfile data to run/ and dispose documents
 	// ---
 	{
-		SYSTEM( ("cp " + worldfile->getPath() + " run/original.wf").c_str() );
-		SYSTEM( ("cp " + schema->getPath() + " run/original.wfs").c_str() );
+		SYSTEM( ("cp " + worldfile->getPath() + " runs/run/original.wf").c_str() );
+		SYSTEM( ("cp " + schema->getPath() + " runs/run/original.wfs").c_str() );
 
 		{
-			ofstream out( "run/normalized.wf" );
+			ofstream out( "runs/run/normalized.wf" );
 			proplib::DocumentWriter writer( out );
 			writer.write( worldfile );
 		}
@@ -547,7 +582,7 @@ TSimulation::~TSimulation()
 	printf( "Simulation stopped after step %ld\n", fStep );
 
 	{
-		ofstream fout( "run/endStep.txt" );
+		ofstream fout( "runs/run/endStep.txt" );
 		fout << fStep << endl;
 		fout.close();
 	}
@@ -744,7 +779,7 @@ void TSimulation::Step()
 void TSimulation::End( const string &reason )
 {
 	{
-		ofstream fout( "run/endReason.txt" );
+		ofstream fout( "runs/run/endReason.txt" );
 		fout << reason << endl;
 		fout.close();
 	}
@@ -1105,8 +1140,8 @@ void TSimulation::ReadSeedFilePaths()
 		exit( 1 );
 	}
 
-	makeDirs( "run/genome" );
-	SYSTEM( "cp genomeSeeds.txt run/genome" );
+	makeDirs( "runs/run/genome" );
+	SYSTEM( "cp genomeSeeds.txt runs/run/genome" );
 
 	char buf[1024 * 4];
 	while( !in.eof() )
@@ -1166,7 +1201,7 @@ void TSimulation::ReadSeedPositionsFromFile()
 		exit( 1 );
 	}
 
-	SYSTEM( "mkdir -p run/motion/position && cp seedPositions.txt run/motion/position" );
+	SYSTEM( "mkdir -p runs/run/motion/position && cp seedPositions.txt runs/run/motion/position" );
 
 	while( !in.eof() )
 	{
@@ -3790,7 +3825,7 @@ float TSimulation::AgentFitness( agent* c )
 		{
 			fprintf( stderr, "********** complexity being calculated when it should already be known **********\n" );
 			char filename[256];
-			sprintf( filename, "run/brain/function/brainFunction_%ld.txt", c->Number() );
+			sprintf( filename, "runs/run/brain/function/brainFunction_%ld.txt", c->Number() );
 			if( fComplexityType == "D" )	// difference between I and P complexity being used for fitness
 			{
 				float pComplexity = CalcComplexity_brainfunction( filename, "P" );
